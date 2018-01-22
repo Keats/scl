@@ -5,11 +5,17 @@ To be a language used for any kind of configuration
 file without any of the ambiguities some languages like
 YAML or TOML have.
 
+It is *only* meant for configurations and doesn't allow any logic in it.
+
+To ensure ease of use, SCL allows including other files. This makes composing
+and inheriting (such as the classic production settings inheriting a base setting file
+and changing the secrets) trivial at the configuration file level.
+
 ## Example
 
 ```nginx
 # This is a SCL document. Boom.
-extends "base.scl"
+include "base.scl"
 
 owner = {
   name = "Vincent Prouillet",
@@ -259,61 +265,34 @@ Dictionaries can also be written inline:
 my_dict = { admin = true, ratings = [ 1, 2, 3], # trailing comma still allowed }
 ```
 
-## Extends
+## Includes
+A SCL file can include another SCL file in two ways:
 
-A SCL file can extends another if the first non-comment line is an `extends` directive.
+- without a key
+- with a key
 
-```
-# comments allowed here
-extends "base.scl"
-```
-
-Anything other than a comment or empty lines is an error:
+Includes can only happen at the root level or in a dictionary.
 
 ```toml
+# without a key
+include "ssl.scl"
+
+# with a key
+ssl = include "ssl.scl"
+
+# in a dict
+site = {
+    ssl = include "ssl.scl"
+}
+
 # INVALID
-key = "value"
-extends "base.scl"
+ips = [include "ssl.scl"]
 ```
 
-Extending another file is useful when you have a base configuration file and want to only change
-a few things for staging, prod etc.
+If there is no key, the data from the included file will be directly in the current level: the root or the dict the include is in.
 
-Merging happens the following way:
-
-- the base file is loaded first
-- all key/value pairs in the child file will replace/be added to the configuration
-
-It is not possible to unset a key set in a parent template, only to override it.
-
-```toml
-# parent
-foo = "bar"
-server = {
-    ssl = false,
-    ip = "192.168.0.2",
-}
-
-# child
-extends "parent.scl"
-
-server = {
-    ip = "192.168.0.3",
-    debug = false,
-}
-
-# will give the following data:
-foo = "bar"
-server = {
-    ssl = false,
-    ip = "192.168.0.3",
-    debug = false,
-    debug = false,
-}
-
-```
-There is no limit on the number of inheritance levels.
-Circular inheritance is an error.
+Includes can be used to simulate inheritance: place the include at the top and you can then override some specific values below.
+Order matters however: any key/value set before an `include` also present in the included file will be overriden.
 
 ## Environment variables
 SCL has first-class support for environment variables:
