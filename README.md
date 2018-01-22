@@ -20,7 +20,7 @@ include "base.scl"
 owner = {
   name = "Vincent Prouillet",
   bio = "Someone",
-  dob = 1979-05-27, # first-class date(time) type
+  dob = 1979-05-27, # first-class date type
 }
 
 database = {
@@ -31,7 +31,7 @@ database = {
 }
 
 servers = {
-  max_upload_size = 10Mb # first class byte size
+  max_upload_size = 10Mb, # first class byte size
   alpha = {
     ip = "10.0.0.1",
     dc = "eqdc10",
@@ -73,7 +73,7 @@ key = "value"
 ```
 
 Keys may only contain ASCII letters, ASCII digits, underscores, and dashes (`A-Za-z0-9_-`).
-Values must be of the following types: String, Integer, Float, Boolean, Datetime, Array, or Object. 
+Values must be of the following types: String, Integer, Float, Boolean, Date, Array, or Dictionary. 
 Unspecified values are invalid.
 
 ## Booleans
@@ -107,13 +107,12 @@ New lines are easy as well.
 C:\Users\nodejs\templates will work and <\i\c*\s*> as well
 """
 ```
-A newline immediately following the opening delimiter will be trimmed. All other whitespace and newline characters remain intact.
+A newline immediately following the opening delimiter will be left trimmed. All other whitespace and newline characters remain intact.
 
 ## Integer
 Integers are whole numbers. Positive numbers may be prefixed with a plus sign. Negative numbers are prefixed with a minus sign.
 
 ```
-int1 = +99
 int2 = 42
 int3 = 0
 int4 = -17
@@ -137,74 +136,40 @@ A float consists of an integer part (which follows the same rules as integer val
 If both a fractional part and exponent part are present, the fractional part must precede the exponent part.
 
 ```
-# fractional
-flt1 = +1.0
+flt1 = 1.0
 flt2 = 3.1415
 flt3 = -0.01
 
-# exponent
-flt4 = 5e+22
-flt5 = 1e6
-flt6 = -2E-2
-
-# both
-flt7 = 6.626e-34
 ```
 
 A fractional part is a decimal point followed by one or more digits.
 
-An exponent part is an E (upper or lower case) followed by an integer part (which follows the same rules as integer values).
 
-Similar to integers, you may use underscores to enhance readability. 
+Similar to integers, you may use underscores on the integer part to enhance readability. 
 Each underscore must be preceded by at least one digit and followed by 3 digits.
 
 ```
-flt8 = 9_224_617.445_991_228_313
+flt4 = 9_224_617.445
 ```
-
 
 ### Byte size
-SCL has first-class support for filesize in powers of ten.
+SCL has first-class support for filesize in powers of ten, following [SI](https://en.wikipedia.org/wiki/Kilobyte).
 
-You can append the following strings to an integer or a float and SCL will convert it in bytes:
+You can append the following strings to a positive integer or a positive float and SCL will convert it in bytes:
 
-- kB, kilobyte, kilobytes
-- MB, megabyte, megabytes
-- GB, gigabyte, gigabytes
-- TB, terabyte, terabytes
-- PB, petabyte, petabytes
+- kB and KB
+- MB
+- GB
+- TB
+- PB
 
+## Dates
 
-## Dates && datetimes
-
-To unambiguously represent a specific instant in time, you may use an
-[RFC 3339](http://tools.ietf.org/html/rfc3339) formatted date-time with offset.
-
-```toml
-odt1 = 1979-05-27T07:32:00Z
-odt2 = 1979-05-27T00:32:00-07:00
-odt3 = 1979-05-27T00:32:00.999999-07:00
-```
-
-For the sake of readability, you may replace the T delimiter between date and
-time with a space (as permitted by RFC 3339 section 5.6).
+You may use the date part of
+[RFC 3339](http://tools.ietf.org/html/rfc3339) to represent a date.
 
 ```toml
-odt4 = 1979-05-27 07:32:00Z
-```
-
-The precision of fractional seconds is implementation specific, but at least
-millisecond precision is expected. If the value contains greater precision than
-the implementation can support, the additional precision must be truncated, not
-rounded.
-
-You can also have local datetime and dates by omitting the offset:
-
-```toml
-ldt1 = 1979-05-27T07:32:00
-ldt2 = 1979-05-27T00:32:00.999999
-
-ld1 = 1979-05-27
+date = 1979-05-27
 ```
 
 ## Array
@@ -262,7 +227,7 @@ my_dict = {
 Dictionaries can also be written inline:
 
 ```toml
-my_dict = { admin = true, ratings = [ 1, 2, 3], # trailing comma still allowed }
+my_dict = { admin = true, ratings = [ 1, 2, 3], } # trailing comma still allowed
 ```
 
 ## Includes
@@ -271,10 +236,11 @@ A SCL file can include another SCL file in two ways:
 - without a key
 - with a key
 
-Includes can only happen at the root level or in a dictionary.
+Includes can only happen at the root level or in a dictionary and the paths
+are relative to each other.
 
 ```toml
-# without a key
+# without a key (local include)
 include "ssl.scl"
 
 # with a key
@@ -282,6 +248,9 @@ ssl = include "ssl.scl"
 
 # in a dict
 site = {
+    # in a dict without a key
+    include "something.scl"
+    # in a dict with a key
     ssl = include "ssl.scl"
 }
 
@@ -289,10 +258,24 @@ site = {
 ips = [include "ssl.scl"]
 ```
 
-If there is no key, the data from the included file will be directly in the current level: the root or the dict the include is in.
+If there is no key, the data from the included file will be directly in the current level: the root or the dictionary the `include` is in.
 
-Includes can be used to simulate inheritance: place the include at the top and you can then override some specific values below.
-Order matters however: any key/value set before an `include` also present in the included file will be overriden.
+Includes can be used to simulate inheritance: place the `include` at the top and you can then override some specific values below.
+Order matters however: any key/value set before an `include` also present in the included file will be overriden. It is not
+possible to override a particular key from a dictionary.
+
+A few examples:
+
+```toml
+# secrets.scl
+stripe = ${STRIPE_SECRET}
+mail = 1GB
+
+# base.scl
+logging = include "logs.scl"
+logging_enabled = false
+
+```
 
 ## Environment variables
 SCL has first-class support for environment variables:
@@ -311,10 +294,25 @@ It is possible to define a default value in case the environment variable is not
 site_url = ${SITE_URL || "some val"}
 ```
 
-The default value types allowed are: boolean, string, integer, float and date/datetime.
-The strings `true` and `false` will be interpreted as the equivalent booleans.
+The default value types allowed are: boolean, string, integer, float and date.
+
+As every value that comes from the environment is a string, you might want to cast the value to a different type:
+
+```toml
+site_url = ${DB_PORT as integer || 5000}
+debug = ${DB_PORT as bool || false}
+```
+
+The cast types allowed are: `bool`, `integer`, `float` and `date`. 
+If a cast is done and there is a default value, the types of those need to match.
+
+```toml
+site_url = ${DB_PORT as integer || false}  # ERROR
+```
 
 ## Filename extension
 SCL files should use the extension `.scl`.
 
 ## Comparison with TOML
+
+## Comparison with YAML

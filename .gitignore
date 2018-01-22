@@ -1,7 +1,7 @@
 /*.iml
 /.idea
 target/
-Cargo.lock
+parser/Cargo.lock
 notes
 out.html
 *.bench

@@ -1,0 +1,71 @@
+whitespace = _{ " " | "\t" | "\r" }
+
+line_end = _{ "\n" | eoi }
+comments = _{ "#" ~ (!line_end ~ any)* ~ line_end }
+
+
+/// LITERALS
+boolean          = { "true" | "false" }
+string           = @{ "\"" ~ (!("\"") ~ any)* ~ "\"" }
+multiline_string = @{ "\""{3} ~ (!("\""{3}) ~ any)* ~ "\""{3} }
+
+// normal digits or a set of readable one (ie preceded by an underscore)
+digits = _{ '0'..'9' | "_" ~ '0'..'9'{3} }
+int   = @{ "-"? ~ ("0" | '1'..'9' ~ digits*) }
+float = @{
+    "-"? ~
+    (
+        "0" ~ "." ~ '0'..'9'+ |
+        '1'..'9' ~ digits* ~ "." ~ '0'..'9'+
+    )
+}
+byte_size_number = @{ ("0" | '1'..'9' ~ digits*) ~ ("." ~ '0'..'9'+)? }
+byte_size_unit   = { "kB" | "KB" | "MB" | "GB" | "TB" | "PB" }
+byte_size        = ${ byte_size_number ~ byte_size_unit }
+
+year  = _{ '1'..'9' ~ '0'..'9'{3} }
+month = _{ ("0" ~ '1'..'9') | ("1" ~ '0'..'2') }
+day   = _{ ("0" ~ '1'..'9') | ("1" ~ '0'..'9') | ("2" ~ '0'..'9') | "30" | "31" }
+date  = @{ year ~ "-" ~ month ~ "-" ~ day }
+
+literal = _{ date | boolean | multiline_string | string | float | int }
+env_var_cast = { "integer" | "float" | "bool" | "date" }
+env_var = { "${" ~ key ~ ("as" ~ env_var_cast)? ~ ("||" ~ literal)? ~ "}"}
+
+include = { "include" ~ string }
+
+key = @{
+    ('a'..'z' | 'A'..'Z' | "_") ~
+    ('a'..'z' | 'A'..'Z' | "_" | "-" | '0'..'9')*
+}
+value = { dict | array | env_var | byte_size | literal }
+array = {
+    "[" ~
+        "\n"* ~ comments* ~ "\n"* ~
+        (value ~ ("," ~ comments* ~ "\n"* ~ value)* ~ ","?)? ~
+        "\n"* ~ comments* ~ "\n"* ~
+    "]"
+}
+
+key_value = { key ~ "=" ~ (value | include) }
+
+dict = {
+    "{" ~
+        "\n"* ~ comments* ~ "\n"* ~
+        (
+            (include ~ comments* ~ "\n"*) | (key_value ~ ("," ~ "\n"* ~ comments* ~ "\n"* ~ key_value)* ~ ","?)
+        )? ~
+        "\n"* ~ comments* ~ "\n"* ~
+    "}"
+}
+
+
+document = !{
+    soi ~
+    "\n"* ~ comments* ~ "\n"* ~
+    (
+        (comments | "\n")* ~(key_value | include) ~ (comments | line_end)
+    )* ~
+    "\n"* ~ comments* ~ "\n"* ~
+    eoi
+}

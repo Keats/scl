@@ -1,0 +1,38 @@
+# The equivalent of the example of the TOML language as SCL
+# https://github.com/toml-lang/toml#user-content-example
+
+# This is a TOML document.
+title = "TOML Example"
+
+owner = {
+    name = "Tom Preston-Werner",
+    # SCL only supports dates, not datetimes
+    dob = 1979-05-27 # First class dates
+}
+
+database = {
+    server = "192.168.1.1",
+    ports = [ 8001, 8001, 8002 ],
+    connection_max = 5000,
+    enabled = true,
+}
+
+servers = {
+    alpha = {
+      ip = "10.0.0.1",
+      dc = "eqdc10",
+    },
+
+    beta = {
+      ip = "10.0.0.2",
+      dc = "eqdc10",
+    }
+}
+
+clients = {
+    data = [ ["gamma", "delta"], [1, 2] ],
+    hosts = [
+        "alpha",
+        "omega",
+    ]
+}
