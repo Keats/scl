@@ -1,0 +1,17 @@
+# The equivalent of the Cargo.toml of this crate as SCL
+
+package = {
+    name = "scl-parser",
+    version = "0.1.0",
+    authors = ["Vincent Prouillet"],
+}
+
+dependencies = {
+    pest = "^1.0.0",
+    pest_derive = "^1.0.0",
+}
+
+dev-dependencies = {
+    tempdir = "0.3",
+}
+

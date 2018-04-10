@@ -1,0 +1,31 @@
+# prod config
+
+# include "base.scl"
+debug = true
+
+title = "hey"
+ho = [1,2 ,3] # some comment
+hey = [
+    # a comment here
+    1, # one here
+    2
+    # and one here
+]
+max_upload_size = 10MB
+
+# other = include "other.scl"
+
+
+# TODO
+
+
+# Database
+
+
+db = { url = "blabla", password = ${DB_PASSWORD || "****" } } # here
+users = {
+    # one comment here
+    me = { # or here
+        admin = true, # important
+    } # un
+} # dernier

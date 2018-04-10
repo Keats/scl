@@ -1,0 +1,6 @@
+# prod config
+
+include "included1.scl"
+debug = false
+hostname = "something else"
+logging = include "included2.scl"
