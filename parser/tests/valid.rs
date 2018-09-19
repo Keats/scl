@@ -87,6 +87,7 @@ fn test_cargo() {
             )),
             "dev-dependencies" => V::Dict(btreemap!(
                 "tempdir" => V::String("0.3".to_string()),
+                "pretty_assertions" => V::String("0.5".to_string()),
             ))
         ),
     );

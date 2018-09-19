@@ -6,7 +6,6 @@ authors = ["Vincent Prouillet <prouillet.vincent@gmail.io>"]
 [dependencies]
 pest = "^1.0.0"
 pest_derive = "^1.0.0"
-failure = "0.1"
 
 [dev-dependencies]
 tempdir = "0.3"
