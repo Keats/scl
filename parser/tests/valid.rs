@@ -1,10 +1,10 @@
-extern crate scl_parser;
+extern crate scl;
 #[macro_use]
 extern crate pretty_assertions;
 
 use std::env;
 
-use scl_parser::{parse_file, Date, Dict, Value as V};
+use scl::{parse_file, Date, Dict, Value as V};
 
 macro_rules! btreemap {
     // trailing comma case

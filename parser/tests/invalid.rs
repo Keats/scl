@@ -1,6 +1,6 @@
-extern crate scl_parser;
+extern crate scl;
 
-use scl_parser::{parse_file, Error};
+use scl::{parse_file, Error};
 
 fn assert_error_msg(filename: &str, needle: &str) {
     let res = parse_file(&format!("./tests/invalid/{}.scl", filename));
