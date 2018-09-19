@@ -1,2 +1,3 @@
 - think about key include and whether it's worth having without being able to override
 - see if it's worth removing double quotes for includes: consider having a path type for it?
+- think of adding a time interval type: the issue is what to convert it to? number of ms?

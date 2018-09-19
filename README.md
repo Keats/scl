@@ -65,7 +65,7 @@ key = "value" # This is a comment at the end of a line
 ```
 
 ## Key/Value pair
-Keys are on the left of the equals sign and values are on the right. 
+Keys are on the left of the equals sign and values are on the right.
 Whitespace is ignored around key names and values. The key, equals sign, and value must be on the same line.
 
 ```
@@ -73,7 +73,7 @@ key = "value"
 ```
 
 Keys may only contain ASCII letters, ASCII digits, underscores, and dashes (`A-Za-z0-9_-`).
-Values must be of the following types: String, Integer, Float, Boolean, Date, Array, or Dictionary. 
+Values must be of the following types: String, Integer, Float, Boolean, Date, Array, or Dictionary.
 Unspecified values are invalid.
 
 ## Booleans
@@ -117,7 +117,7 @@ int2 = 42
 int3 = 0
 int4 = -17
 ```
-For large numbers, you may use underscores between digits to enhance readability. 
+For large numbers, you may use underscores between digits to enhance readability.
 Each underscore must be preceded by at least one digit and followed by 3 digits.
 
 ```
@@ -132,7 +132,7 @@ int2 = _10 # INVALID
 ## Float
 
 Floats should be implemented as IEEE 754 binary64 values.
-A float consists of an integer part (which follows the same rules as integer values) followed by a fractional part and/or an exponent part. 
+A float consists of an integer part (which follows the same rules as integer values) followed by a fractional part and/or an exponent part.
 If both a fractional part and exponent part are present, the fractional part must precede the exponent part.
 
 ```
@@ -145,7 +145,7 @@ flt3 = -0.01
 A fractional part is a decimal point followed by one or more digits.
 
 
-Similar to integers, you may use underscores on the integer part to enhance readability. 
+Similar to integers, you may use underscores on the integer part to enhance readability.
 Each underscore must be preceded by at least one digit and followed by 3 digits.
 
 ```
@@ -174,7 +174,7 @@ date = 1979-05-27
 
 ## Array
 
-Arrays are square brackets with values inside. Whitespace is ignored. 
+Arrays are square brackets with values inside. Whitespace is ignored.
 Elements are separated by commas. Data types may not be mixed.
 
 ```toml
@@ -186,8 +186,8 @@ arr5 = [ [ 1, 2 ], ["a", "b", "c"] ]
 arr6 = [ 1, 2.0 ] # INVALID
 ```
 
-Arrays can also be multiline. Terminating commas (also called trailing commas)
-are ok after the last value of the array. There can be an arbitrary number of
+Arrays can also be multiline. A single terminating comma (also called trailing commas)
+is allowed after the last value of the array. There can be an arbitrary number of
 newlines and comments before a value and before the closing bracket.
 
 ```toml
@@ -211,8 +211,8 @@ my_dict = {
 }
 ```
 
-You can nest any type of key/value pairs inside. 
-Dict elements are separated by a comma and trailing commas are allowed.
+You can nest any type of key/value pairs inside.
+Dict elements are separated by a comma and a trailing comma is allowed.
 
 ```toml
 my_dict = {
@@ -303,7 +303,7 @@ site_url = ${DB_PORT as integer || 5000}
 debug = ${DB_PORT as bool || false}
 ```
 
-The cast types allowed are: `bool`, `integer`, `float` and `date`. 
+The cast types allowed are: `bool`, `integer`, `float` and `date`.
 If a cast is done and there is a default value, the types of those need to match.
 
 ```toml
@@ -313,6 +313,43 @@ site_url = ${DB_PORT as integer || false}  # ERROR
 ## Filename extension
 SCL files should use the extension `.scl`.
 
-## Comparison with TOML
+## Comparison with other formats
 
-## Comparison with YAML
+SCL has first-class support for file inclusion and environment variable, making
+it unique compared to the classic formats used for configuration.
+
+### Comparison with TOML
+
+SCL is inspired by TOML on some aspects.
+The main advantages of SCL versus TOML are:
+
+- nested tables/dict can be multi-lines
+- byte size type
+- include statement to allow composition from several files
+- environment variable support built-in
+
+SCL allows aims to be easier to understand than TOML, especially with regards to tables/dict
+and array of tables.
+Consider the following TOML:
+
+
+```toml
+title = "TOML Example"
+
+[owner]
+name = "Tom Preston-Werner"
+dob = 1979-05-27T07:32:00-08:00
+
+# How do I write a variable at the same level as `title` from here?
+```
+
+SCL has removed some features of TOML however:
+
+- only date support, no datetime
+- no exponents for number
+
+### Comparison with YAML
+YAML is more user friendly than either SCL or TOML for very short files but breaks down
+after a small-ish amount of lines. YAML is also very hard to parse safely.
+
+YAML doesn't support `include` statements or environment variables.
