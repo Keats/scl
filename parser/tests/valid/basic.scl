@@ -13,6 +13,8 @@ hey = [
 ]
 max_upload_size = 10MB
 
+escaped = "this \"is\" an\nescaped string\x21"
+
 # other = include "other.scl"
 
 

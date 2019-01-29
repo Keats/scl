@@ -32,6 +32,41 @@ struct ParserState<'a> {
     path: Option<&'a Path>,
 }
 
+fn escape_string (s: &str) -> String {
+    let mut result = String::with_capacity(s.len() - 2);
+
+    let mut chars = s[1 .. s.len()-1].chars();
+
+    while let Some(c) = chars.next() {
+        if c == '\\' {
+            let c = chars.next().expect("Unfinished escape sequence");
+            match c {
+                '\\' => result.push('\\'),
+                '"' => result.push('"'),
+                'n' => result.push('\n'),
+                'r' => result.push('\r'),
+                'x' => {
+                    let a = chars.next()
+                        .expect("Unfinished escape sequence")
+                        .to_digit(16)
+                        .expect("Invalid hexadecimal digit");
+                    let b = chars.next()
+                        .expect("Unfinished escape sequence")
+                        .to_digit(16)
+                        .expect("Invalid hexadecimal digit");
+                    // Fails when not ascii
+                    result.push((a*16 + b) as u8 as char);
+                }
+                c => panic!("Invalid escape sequence: \\{}", c)
+            }
+        } else {
+            result.push(c);
+        }
+    }
+
+    result
+}
+
 impl<'a> ParserState<'a> {
     // TODO: error on different cast/default type
     fn parse_env_var(&self, pair: Pair<Rule>) -> Value {
@@ -136,7 +171,7 @@ impl<'a> ParserState<'a> {
                 "false" => Value::Boolean(false),
                 _ => unreachable!(),
             },
-            Rule::string => Value::String(pair.as_str().replace("\"", "").to_string()),
+            Rule::string => Value::String(escape_string(pair.as_str())),
             Rule::multiline_string => {
                 let text = pair.as_str().replace("\"\"\"", "");
                 if text.starts_with('\n') {

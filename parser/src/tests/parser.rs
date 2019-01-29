@@ -34,6 +34,10 @@ fn parse_simple_key_value() {
         ("val = false", Value::Boolean(false)),
         (r#"val = "a string""#, Value::String("a string".to_string())),
         (
+            r#"val = "a \n\r\"\x21 \\string""#,
+            Value::String("a \n\r\"\x21 \\string".to_string()),
+        ),
+        (
             r#"val = """a \n\r "'string""""#,
             Value::String(r#"a \n\r "'string"#.to_string()),
         ),

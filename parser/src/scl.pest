@@ -6,7 +6,7 @@ comments = _{ "#" ~ (!line_end ~ any)* ~ line_end }
 
 /// LITERALS
 boolean          = { "true" | "false" }
-string           = @{ "\"" ~ (!("\"") ~ any)* ~ "\"" }
+string           = @{ "\"" ~ ( "\\" ~ any | !("\"" | "\\") ~ any)* ~ "\"" }
 multiline_string = @{ "\""{3} ~ (!("\""{3}) ~ any)* ~ "\""{3} }
 
 // normal digits or a set of readable one (ie preceded by an underscore)
