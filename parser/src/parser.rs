@@ -32,39 +32,51 @@ struct ParserState<'a> {
     path: Option<&'a Path>,
 }
 
-fn escape_string (s: &str) -> String {
+fn escape_string (s: &str) -> Result<String, Error> {
+
+    fn next <T: Iterator<Item=char>> (iter: &mut T) -> Result<char, Error> {
+        iter.next().ok_or_else(||
+            Error::InvalidSyntax("Unfinished escape sequence".to_string())
+        )
+    }
+
+    fn digit_from_char (ch: char) -> Result<u32, Error> {
+        ch.to_digit(16).ok_or_else(||
+            Error::InvalidSyntax("Invalid hexadecimal digit".to_string())
+        )
+    }
+
     let mut result = String::with_capacity(s.len() - 2);
 
     let mut chars = s[1 .. s.len()-1].chars();
 
     while let Some(c) = chars.next() {
         if c == '\\' {
-            let c = chars.next().expect("Unfinished escape sequence");
+            let c = next(&mut chars)?;
             match c {
                 '\\' => result.push('\\'),
                 '"' => result.push('"'),
                 'n' => result.push('\n'),
                 'r' => result.push('\r'),
                 'x' => {
-                    let a = chars.next()
-                        .expect("Unfinished escape sequence")
-                        .to_digit(16)
-                        .expect("Invalid hexadecimal digit");
-                    let b = chars.next()
-                        .expect("Unfinished escape sequence")
-                        .to_digit(16)
-                        .expect("Invalid hexadecimal digit");
-                    // Fails when not ascii
-                    result.push((a*16 + b) as u8 as char);
+                    let a = digit_from_char(next(&mut chars)?)?;
+                    let b = digit_from_char(next(&mut chars)?)?;
+                    let n = a*16 + b;
+                    if n > 127 {
+                        return Err(Error::InvalidSyntax("Not an ASCII value".to_string()));
+                    }
+                    result.push(n as u8 as char);
                 }
-                c => panic!("Invalid escape sequence: \\{}", c)
+                c => return Err(Error::InvalidSyntax(
+                    format!("Invalid escape sequence: \\{}", c)
+                ))
             }
         } else {
             result.push(c);
         }
     }
 
-    result
+    Ok(result)
 }
 
 impl<'a> ParserState<'a> {
@@ -171,7 +183,7 @@ impl<'a> ParserState<'a> {
                 "false" => Value::Boolean(false),
                 _ => unreachable!(),
             },
-            Rule::string => Value::String(escape_string(pair.as_str())),
+            Rule::string => Value::String(escape_string(pair.as_str()).unwrap()),
             Rule::multiline_string => {
                 let text = pair.as_str().replace("\"\"\"", "");
                 if text.starts_with('\n') {
