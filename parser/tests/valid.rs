@@ -40,6 +40,7 @@ fn test_basic() {
             "ho" => V::Array(vec![V::Integer(1), V::Integer(2), V::Integer(3)]),
             "hey" => V::Array(vec![V::Integer(1), V::Integer(2)]),
             "max_upload_size" => V::Integer(10000000),
+            "escaped" => V::String("this \"is\" an\nescaped string\x21".to_string()),
             "db" => V::Dict(btreemap!(
                 "url" => V::String("blabla".to_string()),
                 "password" => V::String("****".to_string()),

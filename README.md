@@ -95,7 +95,7 @@ They are surrounded by double quotes:
 ```
 str = "The dog says \"woof\"."
 ```
-As you can see, double quotes have to be escaped if used in basic strings.
+As you can see, double quotes have to be escaped if used in basic strings. Valid escape sequences are quotes with `\"`, newlines with `\n` and two digit hexadecimal characters with `\x00`.
 
 ### Multi-line
 They are surrounded by three double quotes on each side.
